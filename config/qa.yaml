@@ -1,0 +1,10 @@
+application:
+   url: "https://www.demoblaze.com/"
+
+browser:
+   name: "chromium"
+   headless: false
+   slow_mo: 0
+
+timeouts:
+   default: 30000
