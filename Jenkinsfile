@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo 'Running Playwright tests...'
 
-                bat '"C:\\Users\\admin\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pytest -v
+                bat '"C:\\Users\\admin\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pytest -v'
             }
         }
     }
