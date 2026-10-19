@@ -1,0 +1,8 @@
+
+pytest
+pytest-bdd
+pytest-xdist
+playwright
+allure-pytest
+PyYAML
+python-dotenv
