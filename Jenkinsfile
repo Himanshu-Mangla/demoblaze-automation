@@ -2,6 +2,11 @@
 pipeline {
     agent any
 
+    triggers {
+        // Run every day at 12:00 PM (noon), India time
+        cron('H 12 * * *')
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -41,47 +46,38 @@ pipeline {
     post {
         always {
             echo 'Pipeline execution completed. Sending QA email...'
-            echo "Email notification started for build ${env.BUILD_NUMBER}"
 
             script {
+                def status = currentBuild.currentResult ?: 'UNKNOWN'
+
+                def emailBody = """
+                <html>
+                <body>
+                    <h2>Daily Playwright QA Report</h2>
+                    <p><b>Project:</b> ${env.JOB_NAME}</p>
+                    <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
+                    <p><b>Build Status:</b> ${status}</p>
+                    <p><b>Build Date:</b> ${new Date()}</p>
+                    <p><b>Tests:</b> Check the attached HTML report and console output.</p>
+                    <p><b>Jenkins Build:</b>
+                    <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                    <p>Regards,<br>QA Team</p>
+                </body>
+                </html>
+                """
+
                 try {
                     emailext(
                         to: 'himanshumangla6@gmail.com, atesting339@gmail.com',
-                        from: 'himanshumangla6@gmail.com',
-                        replyTo: 'himanshumangla6@gmail.com',
-                        subject: "Daily QA Report - ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                        subject: "Daily QA Report - ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${status}",
                         mimeType: 'text/html',
-                        body: """
-                            <html>
-                            <body>
-                                <h2>Daily Playwright QA Report</h2>
-
-                                <p><b>Project:</b> ${env.JOB_NAME}</p>
-                                <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
-                                <p><b>Build Status:</b> ${currentBuild.currentResult}</p>
-                                <p><b>Build Date:</b> ${new Date()}</p>
-
-                                <p>
-                                    <b>Jenkins Build URL:</b>
-                                    <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
-                                </p>
-
-                                <p>
-                                    Daily Playwright test execution has completed.
-                                    The HTML report is attached if it was generated.
-                                </p>
-
-                                <p>Regards,<br>QA Team</p>
-                            </body>
-                            </html>
-                        """,
+                        body: emailBody,
                         attachmentsPattern: 'reports/**/daily-qa-report.html'
                     )
 
-                    echo 'Email Extension step completed without throwing an error.'
+                    echo 'Email extension step completed without throwing an error.'
                 } catch (Exception e) {
-                    echo "EMAIL NOTIFICATION FAILED: ${e.getMessage()}"
-                    currentBuild.description = 'QA email notification failed; check Console Output'
+                    echo "Email notification failed: ${e.getMessage()}"
                 }
             }
         }
