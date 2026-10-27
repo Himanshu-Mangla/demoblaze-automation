@@ -19,7 +19,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing Python dependencies...'
+
                 bat '"C:\\Users\\admin\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install -r requirements.txt'
+
                 bat '"C:\\Users\\admin\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m playwright install chromium'
             }
         }
@@ -43,18 +45,23 @@ pipeline {
             echo 'Pipeline execution completed. Sending QA email...'
 
             emailext(
-                to: 'himanshumangla6@gmail.com',
-                cc: 'atesting339@gmail.com',
+                to: 'himanshumangla6@gmail.com, atesting339@gmail.com',
+
                 subject: "Daily QA Report - ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+
                 mimeType: 'text/html',
+
                 body: """
                     <html>
                     <body>
                         <h2>Daily Playwright QA Report</h2>
 
                         <p><b>Project:</b> ${env.JOB_NAME}</p>
+
                         <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
+
                         <p><b>Build Status:</b> ${currentBuild.currentResult}</p>
+
                         <p><b>Build Date:</b> ${new Date()}</p>
 
                         <p>
@@ -67,10 +74,14 @@ pipeline {
                             Please check the attached HTML report for details.
                         </p>
 
-                        <p>Regards,<br>QA Team</p>
+                        <p>
+                            Regards,<br>
+                            QA Team
+                        </p>
                     </body>
                     </html>
                 """,
+
                 attachmentsPattern: 'reports/**/daily-qa-report.html'
             )
         }
