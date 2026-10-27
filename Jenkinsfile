@@ -40,11 +40,45 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline execution completed.'
+            echo 'Pipeline execution completed. Sending QA email...'
+
+            emailext(
+                to: 'himanshumangla6@gmail.com',
+                cc: 'atesting339@gmail.com',
+                subject: "Daily QA Report - ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                mimeType: 'text/html',
+                body: """
+                    <html>
+                    <body>
+                        <h2>Daily Playwright QA Report</h2>
+
+                        <p><b>Project:</b> ${env.JOB_NAME}</p>
+                        <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
+                        <p><b>Build Status:</b> ${currentBuild.currentResult}</p>
+                        <p><b>Build Date:</b> ${new Date()}</p>
+
+                        <p>
+                            <b>Jenkins Build URL:</b>
+                            <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
+                        </p>
+
+                        <p>
+                            Daily Playwright test execution has completed.
+                            Please check the attached HTML report for details.
+                        </p>
+
+                        <p>Regards,<br>QA Team</p>
+                    </body>
+                    </html>
+                """,
+                attachmentsPattern: 'reports/**/daily-qa-report.html'
+            )
         }
+
         success {
             echo 'All tests passed successfully!'
         }
+
         failure {
             echo 'Build failed. Please check the Console Output.'
         }
